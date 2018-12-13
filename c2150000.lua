@@ -1,0 +1,78 @@
+function BiDiu(c)
+	local e=Effect.CreateEffect(c)
+	e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_QUICK_O)
+	e:SetCost(EVENT_FREE_CHAIN)
+	e:SetRange(LOCATION_HAND)
+	e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e:SetCost(BiDiu.c)
+	e:SetOperation(Bidiu.o)
+	c:RegisterEffect(e)
+end
+function BiDiu.c(e,tp,eg,ep,ev,re,r,rp,chk)
+	local h=e:GetHandler()
+	if chk then return h:IsAbleToDeckAsCost() and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_MZONE,0,1,nil,0x215) or (Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(Card.IsType,tp,LOCATION_SZONE,0,1,nil,0x215)) and IsExistingMatchingCard(BiDiu.f,tp,LOCATION_DECK,0,1,nil,e,tp) end
+	Duel.SendtoDeck(h,nil,2,REASON_COST)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
+end
+function BiDiu.f(c,e,tp)
+	return c:IsSetCard(0x215) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function BiDiu.f2(c,e)
+	return c:IsCode(2150008) and c:IsLevel(3) and not c:IsImmuneToEffect(e)
+end
+function BiDiu.o(e,tp)
+	if Duel.IsExistingMatchingCard(BiDiu.f2,tp,LOCATION_MZONE,0,1,nil,e) and Duel.SelectYesNo(aux.Stringid(2150000,0)) then
+		g=Duel.SelectMatchingCard(tp,BiDiu.f2,tp,LOCATION_MZONE,0,1,1,nil,e)
+		local a=Effect.CreateEffect(e:GetHandler())
+		e:SetType(EFFECT_TYPE_SINGLE)
+		e:SetType(EFFECT_UPDATE_LEVEL)
+		e:SetRange(LOCATION_MZONE)
+		e:SetValue(-2)
+		e:SetReset(RESET_TURN_SET+RESET_LEAVE)
+		g:GetFirst():RegisterEffect(e)
+	else
+		Duel.SendtoDeck(Duel.SelectMatchingCard(tp.Card.IsSetCard,tp,Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and LOCATION_ONFIELD or LOCATION_MZONE,1,1,nil,0x215),nil,2,REASON_EFFECT)
+	end
+	Duel.SpecialSummon(Duel.SelectMatchingCard(tp,BiDiu.f,tp,LOCATION_DECK,0,1,1,nil,e,tp),0,tp,tp,false,false,POS_FACEUP)
+end
+if not c2150000 then return end
+function c2150000.initial_effect(c)
+	BiDiu(c)
+	local e=Effect.CreateEffect(c)
+	e:SetType(EFFECT_TYPE_FIELD)
+	e:SetCode(EFFECT_SET_POSITION)
+	e:SetRange(LOCATION_MZONE)
+	e:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
+	e:SetTarget(c2150000.post)
+	e:SetValue(POS_FACEUP_DEFENSE)
+	c:RegisterEffect(e)
+	e=Effect.CreateEffect(c)
+	e:SetType(EFFECT_TYPE_FIELD)
+	e:SetCode(EFFECT_SET_ATTACK)
+	e:SetRange(LOCATION_MZONE)
+	e:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
+	e:SetTarget(c2150000.atkt)
+	e:SetValue(0)
+	c:RegisterEffect(e)
+end
+function c2150000.post(e,c)
+	local h=e:GetHandler()
+	if not c:IsAttackPos() or c:IsType(TYPE_LINK) or c==h or c:IsImmuneToEffect(e) then return false end
+	e=Effect.CreateEffect(h)
+	e:SetType(EFFECT_TYPE_SINGLE)
+	e:SetCode(EFFECT_SET_DEFENSE_FINAL)
+	e:SetRange(LOCATION_MZONE)
+	e:SetValue(0)
+	e:SetReset(RESET_LEAVE+RESET_PHASE+PHASE_END,2)
+	c:RegisterEffect(e)
+	e=Effect.CreateEffect(h)
+	e:SetType(EFFECT_TYPE_SINGLE)
+	e:SetCode(EFFECT_CANNOT_BE_LINK_MATERIAL)
+	e:SetRange(LOCATION_MZONE)
+	e:SetValue(1)
+	e:SetReset(RESET_LEAVE+RESET_PHASE+PHASE_END,2)
+	c:RegisterEffect(e)
+end
+function c2150000.atkt(e, c)
+	return c:IsType(TYPE_LINK)
+end
