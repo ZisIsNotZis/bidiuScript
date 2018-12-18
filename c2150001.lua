@@ -40,12 +40,12 @@ function c2150001.oDs(e,tp)
 	local c=g:GetFirst()
 	local z=0
 	while c do
-		local t=c:GetLinkedZone()
-		if c:IsControler(tp) then
+		local t=c:GetLinkedZone(tp)
+-- 		if c:IsControler(tp) then
 			z=bit.bor(z,t)
-		else
-			z=bit.bor(z,bit.lshift(t,32)+bit.rshift(t,32))
-		end
+-- 		else
+-- 			z=bit.bor(z,bit.lshift(t,32)+bit.rshift(t,32))
+-- 		end
 		c=g:GetNext()
 	end
 	return z
